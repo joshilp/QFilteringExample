@@ -30,8 +30,17 @@ class MyWidget(QWidget):
 
         self.table = QTableView()
         self.table.setSortingEnabled(True)
+        self.table.setSelectionBehavior(QTableView.SelectRows)
         self.table.setModel(self.filter_proxy_model)
+        self.table.clicked.connect(self.click)
+
         self.layout.addWidget(self.table)
+
+    def click(self):
+        indexes = self.table.selectionModel().selectedIndexes()
+        data = [index.sibling(index.row(), index.column()).data() for index in indexes]
+        print(data)
+        return data
 
 class SortFilterProxyModel(QSortFilterProxyModel):
     def __init__(self):
