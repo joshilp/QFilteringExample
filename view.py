@@ -10,15 +10,18 @@ class MyWidget(QWidget):
 
         self.layout = QVBoxLayout(self)
 
-        self.model = QStandardItemModel(5, 3)
-        self.model.setHorizontalHeaderLabels(['ID', 'DATE', 'VALUE'])
+        self.model = QStandardItemModel(5, 4)
+        labels = ['ID', 'DATE', 'VALUE', 'LAST']
+        self.model.setHorizontalHeaderLabels(labels)
         for row, text in enumerate(['Cell', 'Fish', 'Apple', 'Bananas', 'Mango']):
             self.model.setItem(row, 0, QStandardItem(text))
             self.model.setItem(row, 1, QStandardItem("Sunaina_" + text))
             self.model.setItem(row, 2, QStandardItem("Joshil_" + text))
+            self.model.setItem(row, 3, QStandardItem("Test_" + text))
 
         # self.filter_proxy_model = QSortFilterProxyModel()
-        self.filter_proxy_model = SortFilterProxyModel('')
+        self.filter_proxy_model = SortFilterProxyModel()
+        self.filter_proxy_model.setColumns(len(labels))
         
         self.filter_proxy_model.setSourceModel(self.model)
         # self.filter_proxy_model.setFilterKeyColumn(2) # third column
@@ -33,59 +36,31 @@ class MyWidget(QWidget):
         self.layout.addWidget(self.table)
 
 class SortFilterProxyModel(QSortFilterProxyModel):
-    def __init__(self, data, parent=None):
-        super(SortFilterProxyModel, self).__init__(parent)
+    def __init__(self):
+        super(SortFilterProxyModel, self).__init__()
         self.role = Qt.DisplayRole
-        self.minDate = QDate()
-        self.maxDate = QDate()
-        self.__data = data
 
-    def setFilterMinimumDate(self, date):
-        self.minDate = date
-        self.invalidateFilter()
+    def setColumns(self, columns):
+        self.columns = columns
 
-    def filterMinimumDate(self):
-        return self.minDate
-
-    def setFilterMaximumDate(self, date):
-        self.maxDate = date
-        self.invalidateFilter()
-
-    def filterMaximumDate(self):
-        return self.maxDate
-
-    def filterAcceptsRow(self, sourceRow, sourceParent):
-        index0 = self.sourceModel().index(sourceRow, 0, sourceParent)
-        index1 = self.sourceModel().index(sourceRow, 1, sourceParent)
-        index2 = self.sourceModel().index(sourceRow, 2, sourceParent)
-        value = self.sourceModel().data(index0, self.role) 
-        for ix in (index0, index1, index2):
-            value = self.sourceModel().data(ix, self.role)
+    def filterAcceptsRow(self, row, parent):
+        for index in self._get_indexes(row, parent):
+            value = self.sourceModel().data(index, self.role)
+            print(self.filterRegExp())
             if self.filterRegExp().indexIn(str(value)) >= 0:
                 return True
         return False
 
-    def lessThan(self, left, right):
-        leftData = self.sourceModel().data(left, self.role)
-        rightData = self.sourceModel().data(right, self.role)
+    def _get_indexes(self, row, parent):
+        for col in range(self.columns):
+            yield self.sourceModel().index(row, col, parent)
 
-        if not isinstance(leftData, QDate):
-            emailPattern = QRegExp("([\\w\\.]*@[\\w\\.]*)")
-
-            if left.column() == 1 and emailPattern.indexIn(leftData) != -1:
-                leftData = emailPattern.cap(1)
-
-            if right.column() == 1 and emailPattern.indexIn(rightData) != -1:
-                rightData = emailPattern.cap(1)
-
-        return leftData < rightData
-
-    def dateInRange(self, date):
-        if isinstance(date, QDateTime):
-            date = date.date()
-
-        return ((not self.minDate.isValid() or date >= self.minDate)
-                and (not self.maxDate.isValid() or date <= self.maxDate))
+    # def _get_indexes2(self, row, parent):
+    #     index0 = self.sourceModel().index(row, 0, parent)
+    #     index1 = self.sourceModel().index(row, 1, parent)
+    #     index2 = self.sourceModel().index(row, 2, parent)
+    #     index3 = self.sourceModel().index(row, 3, parent)
+    #     return [index0, index1, index2, index3]
 
 if __name__ == "__main__":
     app = QApplication([])
