@@ -45,7 +45,6 @@ class SortFilterProxyModel(QSortFilterProxyModel):
     def filterAcceptsRow(self, row, parent):
         for index in self._get_indexes(row, parent):
             value = self.sourceModel().data(index, self.role)
-            # if self.filterRegExp().indexIn(str(value)) >= 0:
             if self.filterRegExp().indexIn(str(value)) >= 0:
                 return True
         return False
