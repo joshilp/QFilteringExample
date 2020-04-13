@@ -8,25 +8,28 @@ class MyWidget(QWidget):
     def __init__(self):
         super(MyWidget, self).__init__()
 
+        self.labels = ['ID', 'DATE', 'VALUE', 'LAST']
+        self.sample_data = ['Cell', 'Fish', 'Apple', 'Bananas', 'Mango']
         self.layout = QVBoxLayout(self)
 
         self.model = QStandardItemModel(5, 4)
-        labels = ['ID', 'DATE', 'VALUE', 'LAST']
-        self.model.setHorizontalHeaderLabels(labels)
-        for row, text in enumerate(['Cell', 'Fish', 'Apple', 'Bananas', 'Mango']):
-            self.model.setItem(row, 0, QStandardItem(text))
-            self.model.setItem(row, 1, QStandardItem("Sunaina_" + text))
-            self.model.setItem(row, 2, QStandardItem("Joshil_" + text))
-            self.model.setItem(row, 3, QStandardItem("Test_" + text))
+        self.set_model()
 
         self.filter_proxy_model = SortFilterProxyModel()
-        self.filter_proxy_model.setColumns(len(labels))
+        self.filter_proxy_model.setColumns(len(self.labels))
         self.filter_proxy_model.setSourceModel(self.model)
         self.filter_proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
 
+        self.filter_layout = QHBoxLayout()
+
+        self.combobox = QComboBox()
+        self.combobox.currentTextChanged.connect(self.filter_proxy_model.setFilterRegExp)
+        self.combobox.addItems([''] + self.sample_data)
+        self.filter_layout.addWidget(self.combobox)
+
         self.lineedit = QLineEdit()
         self.lineedit.textChanged.connect(self.filter_proxy_model.setFilterRegExp)
-        self.layout.addWidget(self.lineedit)
+        self.filter_layout.addWidget(self.lineedit)
 
         self.table = QTableView()
         self.table.setSortingEnabled(True)
@@ -34,7 +37,17 @@ class MyWidget(QWidget):
         self.table.setModel(self.filter_proxy_model)
         self.table.clicked.connect(self.click)
 
+        
+        self.layout.addLayout(self.filter_layout)
         self.layout.addWidget(self.table)
+    
+    def set_model(self):
+        self.model.setHorizontalHeaderLabels(self.labels)
+        for row, text in enumerate(self.sample_data):
+            self.model.setItem(row, 0, QStandardItem(text))
+            self.model.setItem(row, 1, QStandardItem("Sunaina_" + text))
+            self.model.setItem(row, 2, QStandardItem("Joshil_" + text))
+            self.model.setItem(row, 3, QStandardItem("Test_" + text))
 
     def click(self):
         indexes = self.table.selectionModel().selectedIndexes()
