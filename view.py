@@ -8,7 +8,7 @@ class MyWidget(QWidget):
     def __init__(self):
         super(MyWidget, self).__init__()
 
-        self.labels = ['ID', 'DATE', 'VALUE', 'LAST']
+        self.labels = ['ID', 'LABEL1', 'LABEL2', 'LABEL3']
         self.sample_data = ['Cell', 'Fish', 'Apple', 'Bananas', 'Mango']
         self.layout = QVBoxLayout(self)
 
@@ -45,9 +45,9 @@ class MyWidget(QWidget):
         self.model.setHorizontalHeaderLabels(self.labels)
         for row, text in enumerate(self.sample_data):
             self.model.setItem(row, 0, QStandardItem(text))
-            self.model.setItem(row, 1, QStandardItem("Sunaina_" + text))
-            self.model.setItem(row, 2, QStandardItem("Joshil_" + text))
-            self.model.setItem(row, 3, QStandardItem("Test_" + text))
+            self.model.setItem(row, 1, QStandardItem("Test1_" + text))
+            self.model.setItem(row, 2, QStandardItem("Test2_" + text))
+            self.model.setItem(row, 3, QStandardItem("Test3_" + text))
 
     def click(self):
         indexes = self.table.selectionModel().selectedIndexes()
